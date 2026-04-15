@@ -573,7 +573,192 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- POST MODAL -->
+<div id="post-overlay" style="display:none; position:fixed; inset:0; background:rgba(26,23,20,0.7); z-index:200; overflow-y:auto; padding: 2rem 1rem;">
+  <div id="post-modal" style="max-width:680px; margin:0 auto; background:var(--paper); border:1.5px solid var(--ink); padding:3rem 3rem 4rem; position:relative; animation: slideUp 0.25s ease;">
+    <button onclick="closePost()" style="position:absolute; top:1.25rem; right:1.25rem; background:none; border:none; cursor:pointer; font-family:var(--mono); font-size:12px; color:var(--ink-muted); letter-spacing:0.08em;">✕ Close</button>
+    <div id="post-content"></div>
+    <!-- Comments -->
+    <div style="margin-top:3rem; border-top:1px solid var(--paper-rule); padding-top:2rem;">
+      <div style="font-family:var(--serif); font-size:1.1rem; font-weight:700; margin-bottom:1.25rem;">Comments</div>
+      <div id="comments-list" style="margin-bottom:1.5rem;"></div>
+      <div style="border:1px solid var(--paper-rule); padding:1.25rem; background:white;">
+        <input id="comment-name" placeholder="Your name" style="width:100%; border:none; border-bottom:1px solid var(--paper-rule); padding:8px 0; font-family:var(--body); font-size:14px; margin-bottom:10px; background:transparent; color:var(--ink); outline:none;" />
+        <textarea id="comment-text" placeholder="Share your thoughts…" rows="3" style="width:100%; border:none; font-family:var(--body); font-size:14px; resize:none; background:transparent; color:var(--ink); outline:none; line-height:1.6;"></textarea>
+        <button onclick="submitComment()" style="margin-top:10px; background:var(--ink); color:var(--paper); border:none; padding:9px 20px; font-family:var(--mono); font-size:11px; letter-spacing:0.1em; cursor:pointer;">Post comment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.post-body h2 { font-family:var(--serif); font-size:1.4rem; font-weight:700; margin:2rem 0 0.75rem; }
+.post-body p  { margin-bottom:1.25rem; color:var(--ink-soft); font-weight:300; }
+.post-body blockquote { border-left:3px solid var(--accent); padding-left:1.25rem; margin:1.5rem 0; font-style:italic; color:var(--ink-soft); }
+.comment-item { padding:1rem 0; border-bottom:1px solid var(--paper-rule); }
+.comment-author { font-family:var(--mono); font-size:11px; font-weight:500; color:var(--ink); letter-spacing:0.04em; margin-bottom:4px; }
+.comment-text { font-size:14px; color:var(--ink-soft); line-height:1.6; }
+.locked-gate { text-align:center; padding:2.5rem 1.5rem; background:var(--accent-soft); border:1px dashed var(--accent); margin-top:1.5rem; }
+.locked-gate p { font-size:15px; color:var(--ink-soft); margin-bottom:1rem; }
+.locked-gate button { background:var(--accent); color:white; border:none; padding:10px 24px; font-family:var(--mono); font-size:12px; letter-spacing:0.08em; cursor:pointer; }
+</style>
+
 <script>
+const posts = {
+  featured: {
+    tag: 'Essay', title: 'The Quiet Revolution Nobody Noticed',
+    date: 'June 12, 2025', readTime: '8 min read', paid: false,
+    content: `
+      <p>There's a shift happening in how people consume information — slowly, then all at once. The platforms that defined the last decade are scrambling to catch up.</p>
+      <h2>The old model is breaking</h2>
+      <p>For years, the implicit contract was simple: you give us your attention, we give you content. Advertisers pay the difference. Everyone wins — or so the story went.</p>
+      <blockquote>"The medium shapes the message. The algorithm shapes the medium."</blockquote>
+      <p>But something cracked. Users got tired. Not loudly — there was no mass exodus, no viral manifesto. Just a quiet retreat. Fewer posts. More lurking. Then, eventually, leaving.</p>
+      <h2>What's replacing it</h2>
+      <p>Direct publishing is having a moment. Newsletters, personal blogs, podcasts with paying subscribers. The creator owns the list. No algorithm stands between writer and reader.</p>
+      <p>This is the revolution nobody noticed: the best writers quietly left the feed and built something you have to choose to subscribe to. And readers followed.</p>
+      <h2>What this means for you</h2>
+      <p>If you're building an audience, the lesson is clear. Own your list. Write for people, not for platforms. Ship consistently, even when it's small.</p>
+      <p>The quiet revolution rewards those who show up.</p>
+    `
+  },
+  '1': {
+    tag: 'Productivity', title: 'Why I Stopped Using Social Media for Research',
+    date: 'May 28, 2025', readTime: '5 min read', paid: false,
+    content: `
+      <p>Three years ago I made a decision that felt radical at the time: I stopped using Twitter, Reddit, and LinkedIn as research tools. Here's what I found out.</p>
+      <h2>The engagement trap</h2>
+      <p>Algorithms optimize for one thing: time on platform. That means surfacing content that provokes a reaction — outrage, awe, fear. Not content that is accurate, nuanced, or useful for actual research.</p>
+      <blockquote>"I was mistaking virality for validity."</blockquote>
+      <p>Every time I searched a topic on social media, I was getting the most-shared take, not the most-considered one. The difference matters enormously.</p>
+      <h2>What I use instead</h2>
+      <p>RSS feeds from primary sources. Google Scholar for anything technical. Newsletters from people I've vetted over time. It's slower. It's also dramatically better.</p>
+      <p>My research got quieter and more reliable at the same time. Turns out those two things are connected.</p>
+    `
+  },
+  '2': {
+    tag: 'Books', title: 'The Books That Changed How I Think This Year',
+    date: 'May 10, 2025', readTime: '6 min read', paid: false,
+    content: `
+      <p>An annotated list of the books that genuinely shifted something in how I think — not just ones I enjoyed. There's a difference.</p>
+      <h2>On decision-making</h2>
+      <p><em>Thinking in Bets</em> by Annie Duke. The core idea: decisions and outcomes are different things. A good decision can lead to a bad outcome. A bad decision can get lucky. Stop judging yourself by results alone.</p>
+      <h2>On attention</h2>
+      <p><em>Four Thousand Weeks</em> by Oliver Burkeman. The average human life is about 4,000 weeks. That's it. The book is not a productivity guide — it's an argument for accepting limits instead of fighting them.</p>
+      <blockquote>"The real problem isn't how to get more done. It's learning to choose."</blockquote>
+      <h2>On writing</h2>
+      <p><em>Bird by Bird</em> by Anne Lamott. Still the best book on the actual practice of writing. Honest, funny, and genuinely useful. Read it once a year.</p>
+    `
+  },
+  '3': {
+    tag: 'Productivity', title: 'Subscriber Post: The Deep Work Framework I Use',
+    date: 'April 30, 2025', readTime: '9 min read', paid: true,
+    content: ``
+  },
+  '4': {
+    tag: 'Personal', title: 'Notes on Writing Every Day for 100 Days',
+    date: 'April 18, 2025', readTime: '4 min read', paid: false,
+    content: `
+      <p>On January 1st I committed to writing something — anything — every single day for 100 days. I finished on April 10th. Here's my honest debrief.</p>
+      <h2>What I expected</h2>
+      <p>I thought it would get easier. That by day 30 or 40, words would just flow. That the resistance would fade. I was wrong about this in an instructive way.</p>
+      <h2>What actually happened</h2>
+      <p>The resistance didn't go away — I just got better at starting anyway. That's the actual skill. Not inspiration. Not flow states. Just beginning despite the friction.</p>
+      <blockquote>"Writing every day didn't make me a better writer immediately. It made me someone who writes every day. The improvement followed from that."</blockquote>
+      <h2>Would I recommend it?</h2>
+      <p>Yes, with one caveat: lower the bar dramatically. A paragraph counts. A bad paragraph counts. The goal is the streak, not the quality. Quality comes later.</p>
+    `
+  },
+  '5': {
+    tag: 'Tools', title: 'Subscriber Post: My Writing Setup & Tools',
+    date: 'April 5, 2025', readTime: '7 min read', paid: true,
+    content: ``
+  }
+};
+
+const comments = {};
+let currentPostId = null;
+
+function openPost(id) {
+  const post = posts[id];
+  if (!post) return;
+  currentPostId = id;
+
+  let html = `
+    <div style="margin-bottom:1.5rem;">
+      <span style="display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; background:var(--accent-soft); color:var(--accent); padding:3px 10px; margin-bottom:1rem;">${post.tag}</span>
+      <h1 style="font-family:var(--serif); font-size:2rem; font-weight:700; line-height:1.2; letter-spacing:-0.02em; margin-bottom:1rem;">${post.title}</h1>
+      <div style="font-family:var(--mono); font-size:11px; color:var(--ink-muted); letter-spacing:0.04em; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--paper-rule);">
+        ${post.date} &nbsp;·&nbsp; ${post.readTime} &nbsp;·&nbsp; ${post.paid ? '<span style="color:var(--accent);">Paid</span>' : 'Free'}
+      </div>
+    </div>
+  `;
+
+  if (post.paid) {
+    html += `
+      <div class="post-body">${post.content}</div>
+      <div class="locked-gate">
+        <p>This post is for paid subscribers. Subscribe to read the full article.</p>
+        <button onclick="showToast('Stripe payment coming soon!')">Unlock for $7/month</button>
+      </div>
+    `;
+  } else {
+    html += `<div class="post-body">${post.content}</div>`;
+  }
+
+  document.getElementById('post-content').innerHTML = html;
+  renderComments(id);
+
+  const overlay = document.getElementById('post-overlay');
+  overlay.style.display = 'block';
+  overlay.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function closePost() {
+  document.getElementById('post-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('post-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePost();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePost();
+});
+
+function renderComments(id) {
+  const list = document.getElementById('comments-list');
+  const postComments = comments[id] || [];
+  if (postComments.length === 0) {
+    list.innerHTML = '<p style="font-size:14px; color:var(--ink-muted); font-style:italic;">No comments yet — be the first!</p>';
+  } else {
+    list.innerHTML = postComments.map(c => `
+      <div class="comment-item">
+        <div class="comment-author">${c.name}</div>
+        <div class="comment-text">${c.text}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function submitComment() {
+  const name = document.getElementById('comment-name').value.trim();
+  const text = document.getElementById('comment-text').value.trim();
+  if (!name || !text) { showToast('Please enter your name and comment.'); return; }
+  if (!comments[currentPostId]) comments[currentPostId] = [];
+  comments[currentPostId].push({ name, text });
+  document.getElementById('comment-name').value = '';
+  document.getElementById('comment-text').value = '';
+  renderComments(currentPostId);
+  showToast('Comment posted!');
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -584,16 +769,9 @@ function showToast(msg) {
 function subscribe(inputId) {
   const input = document.getElementById(inputId);
   const val = input.value.trim();
-  if (!val || !val.includes('@')) {
-    showToast('Please enter a valid email address.');
-    return;
-  }
+  if (!val || !val.includes('@')) { showToast('Please enter a valid email address.'); return; }
   showToast('🎉 Subscribed! Welcome to The Dispatch.');
   input.value = '';
-}
-
-function openPost(id) {
-  showToast('📖 Post viewer coming soon — add your blog posts here!');
 }
 </script>
 </body>
