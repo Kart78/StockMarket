@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Dispatch — A Blog</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1714;
+    --ink-soft: #4a4540;
+    --ink-muted: #8a847e;
+    --paper: #faf8f4;
+    --paper-warm: #f3ede3;
+    --paper-rule: #e8e0d4;
+    --accent: #c84b2f;
+    --accent-soft: #f0e8e4;
+    --serif: 'Playfair Display', Georgia, serif;
+    --body: 'Source Serif 4', Georgia, serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ── Masthead ── */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 100;
+  }
+  .masthead-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .site-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .site-name span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-subscribe {
+    background: var(--ink) !important;
+    color: var(--paper) !important;
+    padding: 7px 16px;
+    border-radius: 2px;
+    font-family: var(--mono) !important;
+    font-size: 11px !important;
+    letter-spacing: 0.1em;
+  }
+  .nav-subscribe:hover { background: var(--accent) !important; color: white !important; }
+
+  /* ── Hero ── */
+  .hero {
+    border-bottom: 1px solid var(--paper-rule);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 27px,
+        var(--paper-rule) 27px,
+        var(--paper-rule) 28px
+      );
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    max-width: 720px;
+    margin: 0 auto 1.5rem;
+  }
+  .hero-title em { color: var(--accent); font-style: italic; }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+  }
+  .hero-subscribe {
+    display: flex;
+    gap: 0;
+    max-width: 420px;
+    margin: 0 auto;
+    border: 1.5px solid var(--ink);
+  }
+  .hero-subscribe input {
+    flex: 1;
+    border: none;
+    background: white;
+    padding: 12px 16px;
+    font-family: var(--body);
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+  }
+  .hero-subscribe input::placeholder { color: var(--ink-muted); }
+  .hero-subscribe button {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 12px 22px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .hero-subscribe button:hover { background: var(--accent); }
+  .hero-stats {
+    margin-top: 1.5rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Layout ── */
+  .main-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  /* ── Featured post ── */
+  .featured-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .featured-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--paper-rule);
+  }
+  .featured-post {
+    border: 1.5px solid var(--ink);
+    padding: 2rem;
+    margin-bottom: 3rem;
+    background: white;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .featured-post:hover { box-shadow: 6px 6px 0 var(--ink); transform: translate(-2px, -2px); }
+  .post-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 3px 10px;
+    margin-bottom: 1rem;
+  }
+  .post-title {
+    font-family: var(--serif);
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    text-decoration: none;
+    display: block;
+  }
+  .featured-post .post-title { font-size: 2.2rem; }
+  .post-excerpt {
+    font-size: 16px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+    font-weight: 300;
+  }
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+  }
+  .post-meta-dot { color: var(--paper-rule); }
+  .read-link {
+    margin-left: auto;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .read-link:hover { text-decoration: underline; }
+
+  /* ── Post list ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--paper-rule);
+  }
+  .post-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--paper-rule);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .post-card:hover .post-card-title { color: var(--accent); }
+  .post-card-title {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    transition: color 0.15s;
+  }
+  .post-card-excerpt {
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  .post-card-date {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+  .post-card-locked {
+    font-size: 13px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--mono);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar { position: sticky; top: 80px; }
+  .sidebar-block {
+    border: 1px solid var(--paper-rule);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: white;
+  }
+  .sidebar-title {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--paper-rule);
+  }
+  .sidebar-sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .sidebar-input {
+    width: 100%;
+    border: 1px solid var(--paper-rule);
+    padding: 9px 12px;
+    font-family: var(--body);
+    font-size: 14px;
+    margin-bottom: 8px;
+    outline: none;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .sidebar-input:focus { border-color: var(--ink); }
+  .sidebar-btn {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .sidebar-btn:hover { background: var(--accent); }
+  .category-list { list-style: none; }
+  .category-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--paper-rule);
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    transition: color 0.15s;
+  }
+  .category-list li:last-child { border-bottom: none; }
+  .category-list li:hover { color: var(--accent); }
+  .cat-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+  .about-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--paper);
+    margin-bottom: 1rem;
+  }
+  .about-name { font-family: var(--serif); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+  .about-bio { font-size: 13px; color: var(--ink-soft); line-height: 1.6; font-weight: 300; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 12px 20px;
+    border-radius: 2px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    letter-spacing: 0.04em;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 2px solid var(--ink);
+    padding: 2rem;
+    text-align: center;
+  }
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-name { font-family: var(--serif); font-weight: 700; font-size: 1rem; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-family: var(--mono); font-size: 11px; color: var(--ink-muted); text-decoration: none; letter-spacing: 0.06em; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy { font-family: var(--mono); font-size: 11px; color: var(--ink-muted); }
+
+  @media (max-width: 768px) {
+    .main-layout { grid-template-columns: 1fr; gap: 2rem; }
+    .sidebar { position: static; }
+    .nav-links { gap: 1rem; }
+    .nav-links a:not(.nav-subscribe) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <a href="#" class="site-name">The<span>Dispatch</span></a>
+    <nav class="nav-links">
+      <a href="#">Archive</a>
+      <a href="#">About</a>
+      <a href="#" class="nav-subscribe">Subscribe</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Independent writing, no algorithm</p>
+  <h1 class="hero-title">Ideas worth <em>reading</em>, delivered to you</h1>
+  <p class="hero-sub">A blog about technology, culture, and the things worth paying attention to. Written by a human, for humans.</p>
+  <div class="hero-subscribe">
+    <input type="email" id="hero-email" placeholder="your@email.com" />
+    <button onclick="subscribe('hero-email')">Subscribe free</button>
+  </div>
+  <p class="hero-stats">Join 1,240 readers &nbsp;·&nbsp; Free & paid tiers &nbsp;·&nbsp; No spam, ever</p>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="main-layout">
+  <main>
+    <!-- Featured -->
+    <p class="featured-label">Latest post</p>
+    <article class="featured-post" onclick="openPost('featured')">
+      <span class="post-tag">Essay</span>
+      <a class="post-title" href="#">The Quiet Revolution Nobody Noticed</a>
+      <p class="post-excerpt">There's a shift happening in how people consume information — slowly, then all at once. And the platforms that defined the last decade are scrambling to catch up. Here's what I think is actually going on.</p>
+      <div class="post-meta">
+        <span>June 12, 2025</span>
+        <span class="post-meta-dot">·</span>
+        <span>8 min read</span>
+        <span class="post-meta-dot">·</span>
+        <span>Free</span>
+        <a href="#" class="read-link">Read →</a>
+      </div>
+    </article>
+
+    <!-- Archive -->
+    <p class="section-label">Recent posts</p>
+
+    <article class="post-card" onclick="openPost('1')">
+      <div>
+        <div class="post-card-title">Why I Stopped Using Social Media for Research</div>
+        <div class="post-card-excerpt">Algorithms optimize for engagement, not truth. After three years, I finally changed how I work.</div>
+        <div class="post-card-date">May 28, 2025 · 5 min</div>
+      </div>
+      <div></div>
+    </article>
+
+    <article class="post-card" onclick="openPost('2')">
+      <div>
+        <div class="post-card-title">The Books That Changed How I Think This Year</div>
+        <div class="post-card-excerpt">An annotated reading list — with honest notes on what actually stuck.</div>
+        <div class="post-card-date">May 10, 2025 · 6 min</div>
+      </div>
+      <div></div>
+    </article>
+
+    <article class="post-card" onclick="openPost('3')">
+      <div>
+        <div class="post-card-title">Subscriber Post: The Deep Work Framework I Use</div>
+        <div class="post-card-excerpt">How I structure my weeks, protect creative time, and actually ship things.</div>
+        <div class="post-card-date">April 30, 2025 · 9 min</div>
+      </div>
+      <div class="post-card-locked">🔒 Paid</div>
+    </article>
+
+    <article class="post-card" onclick="openPost('4')">
+      <div>
+        <div class="post-card-title">Notes on Writing Every Day for 100 Days</div>
+        <div class="post-card-excerpt">What I expected, what actually happened, and whether I'd recommend it.</div>
+        <div class="post-card-date">April 18, 2025 · 4 min</div>
+      </div>
+      <div></div>
+    </article>
+
+    <article class="post-card" onclick="openPost('5')">
+      <div>
+        <div class="post-card-title">Subscriber Post: My Writing Setup & Tools</div>
+        <div class="post-card-excerpt">Everything from the apps I use to the physical desk setup that makes long sessions bearable.</div>
+        <div class="post-card-date">April 5, 2025 · 7 min</div>
+      </div>
+      <div class="post-card-locked">🔒 Paid</div>
+    </article>
+  </main>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-block">
+      <div class="about-avatar">K</div>
+      <div class="about-name">Kart78</div>
+      <p class="about-bio">Writing about tech, culture, and ideas. Independent since 2023. Based in the internet.</p>
+    </div>
+
+    <div class="sidebar-block">
+      <div class="sidebar-title">Subscribe</div>
+      <p class="sidebar-sub">Free posts weekly. Paid subscribers get bonus essays + full archive access.</p>
+      <input class="sidebar-input" type="email" id="sidebar-email" placeholder="your@email.com" />
+      <button class="sidebar-btn" onclick="subscribe('sidebar-email')">Subscribe free →</button>
+      <div style="margin-top:8px; text-align:center;">
+        <a href="#" style="font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:0.06em;">Go paid — $7/month</a>
+      </div>
+    </div>
+
+    <div class="sidebar-block">
+      <div class="sidebar-title">Browse by topic</div>
+      <ul class="category-list">
+        <li>Technology <span class="cat-count">14</span></li>
+        <li>Culture <span class="cat-count">9</span></li>
+        <li>Productivity <span class="cat-count">7</span></li>
+        <li>Books <span class="cat-count">6</span></li>
+        <li>Personal <span class="cat-count">5</span></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-name">The Dispatch</div>
+    <div class="footer-links">
+      <a href="#">Archive</a>
+      <a href="#">About</a>
+      <a href="#">Twitter</a>
+      <a href="#">RSS</a>
+    </div>
+    <div class="footer-copy">© 2025 — Built with intention</div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function subscribe(inputId) {
+  const input = document.getElementById(inputId);
+  const val = input.value.trim();
+  if (!val || !val.includes('@')) {
+    showToast('Please enter a valid email address.');
+    return;
+  }
+  showToast('🎉 Subscribed! Welcome to The Dispatch.');
+  input.value = '';
+}
+
+function openPost(id) {
+  showToast('📖 Post viewer coming soon — add your blog posts here!');
+}
+</script>
+</body>
+</html>
